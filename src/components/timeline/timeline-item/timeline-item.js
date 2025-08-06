@@ -6,119 +6,70 @@ import { useTimeline } from "../timeline.context";
 import { components } from "./timeline-item.styles";
 
 export function TimelineItem({
-  item,
+  horizontalScrollableParentRef,
+  item: initialItem,
   minTimelineDate,
   onUpdateItem,
   totalDays,
 }) {
   const { columnWidth } = useTimeline();
 
-  const endDate = new Date(item.end);
-  const startDate = new Date(item.start);
+  const [item, setItem] = useState(initialItem);
+
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   const dateRef = useRef(null);
   const itemRef = useRef(null);
 
-  const [dragOffset, setDragOffset] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [originalDateText, setOriginalDateText] = useState("");
+  const endDate = new Date(item.end);
+  const startDate = new Date(item.start);
 
-  const days = getDaysBetween(startDate, endDate);
+  const days = getDaysBetween(startDate, endDate) + 1;
 
   const left = getDaysBetween(minTimelineDate, startDate) * columnWidth;
   const width = days * columnWidth;
 
-  const calculateDatesFromPosition = useCallback(
-    (clientX) => {
-      if (!itemRef.current) {
-        return null;
-      }
-
-      const timelineRect =
-        itemRef.current.parentElement.getBoundingClientRect();
-
-      const position = clientX - timelineRect.left - dragOffset;
-      const positionPercentage = (position / timelineRect.width) * 100;
-
-      const dayOffset = Math.round(
-        (positionPercentage / (100 / totalDays)) * DAY_IN_MILLISECONDS
-      );
-
-      const duration = endDate - startDate;
-
-      const newStartDate = new Date(minTimelineDate.getTime() + dayOffset);
-      const newEndDate = new Date(newStartDate.getTime() + duration);
-
-      return {
-        end: newEndDate,
-        start: newStartDate,
-      };
-    },
-    [dragOffset, endDate, minTimelineDate, startDate, totalDays]
-  );
-
-  const handleDragStart = useCallback((e) => {
-    if (dateRef.current) {
-      setOriginalDateText(dateRef.current.textContent);
+  const calculateDatesFromPosition = (clientX) => {
+    if (!itemRef.current) {
+      return null;
     }
 
+    const timelineRect = itemRef.current.parentElement.getBoundingClientRect();
+
+    const position = clientX - timelineRect.left - dragOffset;
+
+    let dayOffset = Math.round(position / columnWidth);
+    dayOffset = Math.max(0, Math.min(dayOffset, totalDays - days));
+
+    const newStartDate = new Date(
+      minTimelineDate.getTime() + dayOffset * DAY_IN_MILLISECONDS
+    );
+
+    const newEndDate = new Date(newStartDate.getTime() + (endDate - startDate));
+
+    return {
+      start: newStartDate,
+      end: newEndDate,
+    };
+  };
+
+  const handleDragStart = useCallback((e) => {
     setIsDragging(true);
 
     const rect = itemRef.current.getBoundingClientRect();
-
     setDragOffset(e.clientX - rect.left);
-
-    if (itemRef.current) {
-      const clone = itemRef.current.cloneNode(true);
-
-      clone.style.left = "-1000px";
-      clone.style.opacity = "0.9";
-      clone.style.position = "absolute";
-      clone.style.top = "-1000px";
-      clone.style.width = "250px";
-
-      document.body.appendChild(clone);
-
-      try {
-        e.dataTransfer.setDragImage(clone, 50, 35);
-      } finally {
-        setTimeout(() => {
-          document.body.removeChild(clone);
-        }, 0);
-      }
-    }
   }, []);
 
-  const handleDragEnd = useCallback(
-    (e) => {
-      if (!isDragging) {
-        return;
-      }
+  const handleDragEnd = useCallback(() => {
+    if (!isDragging) {
+      return;
+    }
 
-      setIsDragging(false);
+    setIsDragging(false);
 
-      if (dateRef.current && originalDateText) {
-        dateRef.current.textContent = originalDateText;
-      }
-
-      const newDates = calculateDatesFromPosition(e.clientX);
-
-      if (newDates) {
-        onUpdateItem?.({
-          ...item,
-          end: newDates.end,
-          start: newDates.start,
-        });
-      }
-    },
-    [
-      calculateDatesFromPosition,
-      isDragging,
-      item.id,
-      onUpdateItem,
-      originalDateText,
-    ]
-  );
+    onUpdateItem(item);
+  }, [isDragging, item, onUpdateItem]);
 
   const handleDrag = useCallback(
     (e) => {
@@ -126,15 +77,48 @@ export function TimelineItem({
         return;
       }
 
-      const newDates = calculateDatesFromPosition(e.clientX);
+      const scrollWithDrag = () => {
+        if (horizontalScrollableParentRef.current) {
+          const horizontalScrollableParentRect =
+            horizontalScrollableParentRef.current.getBoundingClientRect();
+
+          const scrollStep = columnWidth;
+
+          if (e.clientX > horizontalScrollableParentRect.right) {
+            horizontalScrollableParentRef.current.scrollLeft += scrollStep;
+          } else if (e.clientX < horizontalScrollableParentRect.left) {
+            horizontalScrollableParentRef.current.scrollLeft -= scrollStep;
+          }
+        }
+      };
+
+      const updateItemDatesWithDrag = () => {
+        const dates = calculateDatesFromPosition(e.clientX);
+
+        if (dates) {
+          setItem((prev) => ({
+            ...prev,
+            end: dates.end,
+            start: dates.start,
+          }));
+        }
+      };
+
+      scrollWithDrag();
+      updateItemDatesWithDrag();
     },
-    [isDragging, calculateDatesFromPosition]
+    [
+      calculateDatesFromPosition,
+      columnWidth,
+      horizontalScrollableParentRef,
+      isDragging,
+      item,
+    ]
   );
 
   return (
     <components.root
       draggable="true"
-      left={`${left}px`}
       onDrag={handleDrag}
       onDragEnd={handleDragEnd}
       onDragStart={handleDragStart}
@@ -142,14 +126,18 @@ export function TimelineItem({
       style={{
         background: isDragging ? "#e3f2fd" : "#ffffff",
         cursor: isDragging ? "grabbing" : "grab",
+        left: `${left}px`,
         zIndex: isDragging ? 10 : "auto",
+        width: `calc(${width}px - 8px)`,
       }}
-      width={`calc(${width}px - 8px)`}
+      title={`${item.name} @${formatDate(item.start)} - ${formatDate(
+        item.end
+      )}`}
     >
       <components.content>
         <components.name>{item.name}</components.name>
         <components.dates ref={dateRef}>
-          {formatDate(item.start)} - {formatDate(item.end)}
+          @{formatDate(item.start)} - {formatDate(item.end)}
         </components.dates>
       </components.content>
     </components.root>

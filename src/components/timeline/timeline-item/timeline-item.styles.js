@@ -5,8 +5,8 @@ export const components = {
     align-items: center;
     display: flex;
     height: 100%;
-    gap: 16px;
-    padding-left: 16px;
+    gap: 12px;
+    padding-left: 24px;
     position: relative;
     width: 100%;
   `,
@@ -21,7 +21,7 @@ export const components = {
   name: styled.span`
     color: #404040;
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.025em;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -29,27 +29,25 @@ export const components = {
   `,
   root: styled.div`
     background: #ffffff;
-    border-radius: 8px;
+    border-radius: 24px;
     border: 1px solid rgba(0, 0, 0, 0.1);
     cursor: pointer;
     height: 36px;
-    left: ${(props) => props.left};
-    overflow: hidden;
     padding: 4px;
     position: absolute;
-    /* transition: all 0.15s ease; */
-    width: ${(props) => props.width};
     &::before {
+      aspect-ratio: 1;
+      content: "";
       background: #bbdefb;
       border-radius: 4px;
       bottom: 0;
       content: "";
-      height: 24px;
-      left: 4px;
+      height: 8px;
+      left: 12px;
       margin: auto 0;
       position: absolute;
       top: 0;
-      width: 4px;
+      width: 8px;
     }
     &:hover {
       background: #bbdefb;

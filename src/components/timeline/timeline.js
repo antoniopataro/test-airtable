@@ -1,3 +1,5 @@
+import { useRef } from "react";
+
 import { formatDate } from "../../utils/date.utils";
 import { TimelineItem } from "./timeline-item/timeline-item";
 import { useTimeline } from "./timeline.context";
@@ -10,12 +12,19 @@ export function Timeline() {
 
   const { dates, minYearDate, totalDays } = useTimelineDates(items);
 
+  const horizontalScrollableParentRef = useRef(null);
+
   return (
     <components.container>
-      <components.controls>
-        <components.button onClick={zoomOut}>-</components.button>
-        <components.button onClick={zoomIn}>+</components.button>
-      </components.controls>
+      <components.controls.container>
+        <components.controls.button onClick={zoomIn}>
+          +
+        </components.controls.button>
+        <components.controls.divisor />
+        <components.controls.button onClick={zoomOut}>
+          -
+        </components.controls.button>
+      </components.controls.container>
       <components.timeline.wrapper>
         <components.timeline.divisions.container>
           {dates.map((_, index) => (
@@ -36,11 +45,14 @@ export function Timeline() {
             </components.timeline.dates.label>
           ))}
         </components.timeline.dates.container>
-        <components.timeline.lanes.container>
+        <components.timeline.lanes.container
+          ref={horizontalScrollableParentRef}
+        >
           {lanes.map((lane, index) => (
             <components.timeline.lanes.lane key={index}>
               {lane.map((item) => (
                 <TimelineItem
+                  horizontalScrollableParentRef={horizontalScrollableParentRef}
                   item={item}
                   key={item.id}
                   minTimelineDate={minYearDate}

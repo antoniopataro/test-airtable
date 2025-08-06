@@ -10,9 +10,9 @@ import { assignLanes } from "./timeline.utils";
 
 const TimelineContext = createContext();
 
-const DEFAULT_COLUMN_WIDTH = 128;
+const DEFAULT_COLUMN_WIDTH = 96;
 const MAX_SCALE = 2;
-const MIN_SCALE = 0.5;
+const MIN_SCALE = 0.75;
 const ZOOM_FACTOR = 1.2;
 
 export function TimelineProvider({ children, items: initialItems }) {

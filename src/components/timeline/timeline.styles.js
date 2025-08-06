@@ -1,35 +1,41 @@
 import { styled } from "styled-components";
 
 export const components = {
-  button: styled.button`
-    background: white;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    cursor: pointer;
-    font-size: 16px;
-    padding: 4px 12px;
-    &:hover {
-      background: #f0f0f0;
-    }
-  `,
   container: styled.div`
     border-radius: 8px;
     overflow-x: auto;
     position: relative;
     width: 100%;
   `,
-  controls: styled.div`
-    background: white;
-    border-radius: 8px;
-    bottom: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    display: flex;
-    gap: 8px;
-    padding: 8px;
-    position: fixed;
-    right: 24px;
-    z-index: 1;
-  `,
+  controls: {
+    button: styled.button`
+      background: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 4px 12px;
+      &:hover {
+        background: #f0f0f0;
+      }
+    `,
+    container: styled.div`
+      background: white;
+      border-radius: 24px;
+      border: 1px solid #ddd;
+      bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: fixed;
+      right: 16px;
+      z-index: 1;
+    `,
+    divisor: styled.hr`
+      border: none;
+      border-top: 1px solid #ddd;
+    `,
+  },
   timeline: {
     dates: {
       container: styled.div`
@@ -92,13 +98,11 @@ export const components = {
     wrapper: styled.div`
       background-position: 0 0;
       background-repeat: repeat;
-      background-size: ${(props) => props.$gridSize};
       display: flex;
       flex-direction: column;
       height: 100%;
       min-width: 100%;
       position: relative;
-      transition: all 0.3s ease;
     `,
   },
 };
