@@ -150,7 +150,11 @@ export function TimelineItem({
       )}`}
     >
       <components.content>
-        <components.name onChange={handleRename} value={item.name} />
+        <components.name
+          onChange={handleRename}
+          placeholder="Enter name..."
+          value={item.name}
+        />
         <components.dates ref={dateRef}>
           @{formatDate(item.start)} - {formatDate(item.end)}
         </components.dates>
