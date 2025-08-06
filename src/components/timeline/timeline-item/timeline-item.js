@@ -156,7 +156,7 @@ export function TimelineItem({
           value={item.name}
         />
         <components.dates ref={dateRef}>
-          @{formatDate(item.start)} - {formatDate(item.end)}
+          {formatDate(item.start)} - {formatDate(item.end)}
         </components.dates>
       </components.content>
     </components.root>

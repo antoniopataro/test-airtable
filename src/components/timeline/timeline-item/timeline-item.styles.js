@@ -6,7 +6,8 @@ export const components = {
     display: flex;
     height: 100%;
     gap: 12px;
-    padding-left: 24px;
+    justify-content: space-between;
+    padding: 0 12px 0 24px;
     position: relative;
     width: 100%;
   `,
