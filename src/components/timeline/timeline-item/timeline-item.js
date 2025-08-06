@@ -31,6 +31,10 @@ export function TimelineItem({
   const left = getDaysBetween(minTimelineDate, startDate) * columnWidth;
   const width = size * columnWidth;
 
+  const persistItemUpdate = () => {
+    onUpdateItem(item);
+  };
+
   const calculateDatesFromPosition = (clientX) => {
     if (!itemRef.current) {
       return null;
@@ -105,10 +109,9 @@ export function TimelineItem({
       return;
     }
 
+    persistItemUpdate();
     setIsDragging(false);
-
-    onUpdateItem(item);
-  }, [isDragging, item, onUpdateItem]);
+  }, [isDragging, item, persistItemUpdate]);
 
   const handleDragStart = useCallback((e) => {
     setIsDragging(true);
@@ -123,12 +126,8 @@ export function TimelineItem({
         ...item,
         name: e.target.value,
       });
-      onUpdateItem({
-        ...item,
-        name: e.target.value,
-      });
     },
-    [item, onUpdateItem]
+    [item, persistItemUpdate]
   );
 
   return (
@@ -152,6 +151,7 @@ export function TimelineItem({
       <components.content>
         <components.name
           onChange={handleRename}
+          onBlur={persistItemUpdate}
           placeholder="Enter name..."
           value={item.name}
         />

@@ -14,6 +14,8 @@ export function Timeline() {
 
   const horizontalScrollableParentRef = useRef(null);
 
+  console.log(items);
+
   return (
     <components.container>
       <components.controls.container>
