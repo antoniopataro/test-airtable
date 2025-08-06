@@ -25,10 +25,11 @@ export function TimelineItem({
   const endDate = new Date(item.end);
   const startDate = new Date(item.start);
 
-  const days = getDaysBetween(startDate, endDate) + 1;
+  const days = getDaysBetween(startDate, endDate);
+  const size = days === 0 ? 1 : days;
 
   const left = getDaysBetween(minTimelineDate, startDate) * columnWidth;
-  const width = days * columnWidth;
+  const width = size * columnWidth;
 
   const calculateDatesFromPosition = (clientX) => {
     if (!itemRef.current) {
@@ -53,23 +54,6 @@ export function TimelineItem({
       end: newEndDate,
     };
   };
-
-  const handleDragStart = useCallback((e) => {
-    setIsDragging(true);
-
-    const rect = itemRef.current.getBoundingClientRect();
-    setDragOffset(e.clientX - rect.left);
-  }, []);
-
-  const handleDragEnd = useCallback(() => {
-    if (!isDragging) {
-      return;
-    }
-
-    setIsDragging(false);
-
-    onUpdateItem(item);
-  }, [isDragging, item, onUpdateItem]);
 
   const handleDrag = useCallback(
     (e) => {
@@ -116,6 +100,37 @@ export function TimelineItem({
     ]
   );
 
+  const handleDragEnd = useCallback(() => {
+    if (!isDragging) {
+      return;
+    }
+
+    setIsDragging(false);
+
+    onUpdateItem(item);
+  }, [isDragging, item, onUpdateItem]);
+
+  const handleDragStart = useCallback((e) => {
+    setIsDragging(true);
+
+    const rect = itemRef.current.getBoundingClientRect();
+    setDragOffset(e.clientX - rect.left);
+  }, []);
+
+  const handleRename = useCallback(
+    (e) => {
+      setItem({
+        ...item,
+        name: e.target.value,
+      });
+      onUpdateItem({
+        ...item,
+        name: e.target.value,
+      });
+    },
+    [item, onUpdateItem]
+  );
+
   return (
     <components.root
       draggable="true"
@@ -135,7 +150,7 @@ export function TimelineItem({
       )}`}
     >
       <components.content>
-        <components.name>{item.name}</components.name>
+        <components.name onChange={handleRename} value={item.name} />
         <components.dates ref={dateRef}>
           @{formatDate(item.start)} - {formatDate(item.end)}
         </components.dates>

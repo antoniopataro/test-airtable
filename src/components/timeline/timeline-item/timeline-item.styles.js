@@ -18,12 +18,16 @@ export const components = {
     text-overflow: ellipsis;
     white-space: nowrap;
   `,
-  name: styled.span`
+  name: styled.input`
+    background-color: transparent;
+    border: none;
     color: #404040;
     font-size: 0.875rem;
     font-weight: 600;
     letter-spacing: 0.025em;
+    outline: none;
     overflow: hidden;
+    text-decoration: underline;
     text-overflow: ellipsis;
     white-space: nowrap;
   `,
